@@ -1,1 +1,43 @@
 
+
+name: Build Gopal CSC Center APK
+
+on:
+  workflow_dispatch:
+  push:
+    paths:
+      - 'Gopal_CSC_Center_Android_Studio_Project.zip'
+      - '.github/workflows/build-apk.yml'
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Set up Java
+        uses: actions/setup-java@v4
+        with:
+          distribution: temurin
+          java-version: '17'
+
+      - name: Set up Gradle
+        uses: gradle/actions/setup-gradle@v4
+        with:
+          gradle-version: '8.9'
+
+      - name: Extract project
+        run: |
+          unzip -q Gopal_CSC_Center_Android_Studio_Project.zip -d android-src
+          test -f android-src/settings.gradle
+
+      - name: Build APK
+        working-directory: android-src
+        run: gradle --no-daemon assembleDebug
+
+      - name: Upload APK
+        uses: actions/upload-artifact@v4
+        with:
+          name: Gopal-CSC-Center-APK
+          path: android-src/app/build/outputs/apk/debug/*.apk
